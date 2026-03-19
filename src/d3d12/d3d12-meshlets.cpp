@@ -278,7 +278,10 @@ namespace nvrhi::d3d12
             setResourceStatesForFramebuffer(framebuffer);
         }
         
-        setGraphicsBindings(state.bindings, bindingUpdateMask, state.indirectParams, updateIndirectParams, pso->rootSignature);
+        setGraphicsBindings(state.bindings, bindingUpdateMask,
+            state.indirectParams, updateIndirectParams,
+            nullptr, false, // <-- indirect count buffer not supported for meshlets
+            pso->rootSignature);
         
         commitBarriers();
 

@@ -65,13 +65,13 @@
 #endif
 
 // Line-Swept Spheres were added in NVAPI SDK 572.18
-#if NVRHI_D3D12_WITH_NVAPI && (NVAPI_SDK_VERSION >= 57218)
+#if NVRHI_D3D12_WITH_NVAPI && !NVRHI_D3D12_WITH_DXR12_OPACITY_MICROMAP && (NVAPI_SDK_VERSION >= 57218)
 #define NVRHI_WITH_NVAPI_LSS (1)
 #else
 #define NVRHI_WITH_NVAPI_LSS (0)
 #endif
 
-#if D3D12_PREVIEW_SDK_VERSION >= 717
+#if D3D12_PREVIEW_SDK_VERSION == 717
 #define NVRHI_D3D12_WITH_COOPVEC (1)
 #else
 #define NVRHI_D3D12_WITH_COOPVEC (0)
@@ -994,6 +994,7 @@ namespace nvrhi::d3d12
         void drawIndexed(const DrawArguments& args) override;
         void drawIndirect(uint32_t offsetBytes, uint32_t drawCount) override;
         void drawIndexedIndirect(uint32_t offsetBytes, uint32_t drawCount) override;
+        void drawIndexedIndirectCount(uint32_t paramOffsetBytes, uint32_t countOffsetBytes, uint32_t maxDrawCount) override;
 
         void setComputeState(const ComputeState& state) override;
         void dispatch(uint32_t groupsX, uint32_t groupsY = 1, uint32_t groupsZ = 1) override;
@@ -1054,8 +1055,22 @@ namespace nvrhi::d3d12
 
         void updateGraphicsVolatileBuffers() override;
         void updateComputeVolatileBuffers() override;
-        void setComputeBindings(const BindingSetVector& bindings, uint32_t bindingUpdateMask, IBuffer* indirectParams, bool updateIndirectParams, const RootSignature* rootSignature);
-        void setGraphicsBindings(const BindingSetVector& bindings, uint32_t bindingUpdateMask, IBuffer* indirectParams, bool updateIndirectParams, const RootSignature* rootSignature);
+
+        void setComputeBindings(
+            const BindingSetVector& bindings,
+            uint32_t bindingUpdateMask,
+            IBuffer* indirectParams,
+            bool updateIndirectParams,
+            const RootSignature* rootSignature);
+
+        void setGraphicsBindings(
+            const BindingSetVector& bindings,
+            uint32_t bindingUpdateMask,
+            IBuffer* indirectParams,
+            bool updateIndirectParams,
+            IBuffer* indirectCountBuffer,
+            bool updateIndirectCountBuffer,
+            const RootSignature* rootSignature);
         
     private:
         const Context& m_Context;

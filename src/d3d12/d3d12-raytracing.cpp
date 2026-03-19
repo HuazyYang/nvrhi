@@ -1844,7 +1844,7 @@ namespace nvrhi::d3d12
             }
         }
 
-        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc;
+        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc = {};
         asDesc.Inputs = ommInputs;
         asDesc.ScratchAccelerationStructureData = scratchGpuVA;
         asDesc.DestAccelerationStructureData = omm->getDeviceAddress();

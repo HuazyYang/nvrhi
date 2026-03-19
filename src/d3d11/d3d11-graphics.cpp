@@ -415,6 +415,13 @@ namespace nvrhi::d3d11
         }
     }
 
+    void CommandList::drawIndexedIndirectCount(uint32_t paramOffsetBytes, uint32_t countOffsetBytes, uint32_t maxDrawCount)
+    {
+        (void)countOffsetBytes;
+        // D3D11 doesn't support count buffers - fall back to default drawIndexedIndirect behavior
+        drawIndexedIndirect(paramOffsetBytes, maxDrawCount);
+    }
+
     ID3D11BlendState* Device::getBlendState(const BlendState& blendState)
     {
         size_t hash = 0;

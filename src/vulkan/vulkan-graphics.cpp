@@ -642,6 +642,11 @@ namespace nvrhi::vulkan
         {
             m_CurrentCmdBuf->referencedResources.push_back(state.indirectParams);
         }
+        
+        if (state.indirectCountBuffer && state.indirectCountBuffer != state.indirectParams)
+        {
+            m_CurrentCmdBuf->referencedResources.push_back(state.indirectCountBuffer);
+        }
 
         if (state.shadingRateState.enabled)
         {
@@ -716,6 +721,27 @@ namespace nvrhi::vulkan
         assert(indirectParams);
 
         m_CurrentCmdBuf->cmdBuf.drawIndexedIndirect(indirectParams->buffer, offsetBytes, drawCount, sizeof(DrawIndexedIndirectArguments));
+    }
+
+    void CommandList::drawIndexedIndirectCount(uint32_t paramOffsetBytes, uint32_t countOffsetBytes, uint32_t maxDrawCount)
+    {
+        assert(m_CurrentCmdBuf);
+
+        updateGraphicsVolatileBuffers();
+
+        Buffer* paramBuffer = checked_cast<Buffer*>(m_CurrentGraphicsState.indirectParams);
+        Buffer* countBuffer = checked_cast<Buffer*>(m_CurrentGraphicsState.indirectCountBuffer);
+        assert(paramBuffer);
+        assert(countBuffer);
+
+        m_CurrentCmdBuf->cmdBuf.drawIndexedIndirectCount(
+            paramBuffer->buffer,
+            paramOffsetBytes,
+            countBuffer->buffer,
+            countOffsetBytes,
+            maxDrawCount,
+            sizeof(DrawIndexedIndirectArguments)
+        );
     }
 
 } // namespace nvrhi::vulkan

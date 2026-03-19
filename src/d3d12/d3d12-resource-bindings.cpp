@@ -1050,6 +1050,7 @@ namespace nvrhi::d3d12
     void CommandList::setGraphicsBindings(
         const BindingSetVector& bindings, uint32_t bindingUpdateMask,
         IBuffer* indirectParams, bool updateIndirectParams,
+        IBuffer* indirectCountBuffer, bool updateIndirectCountBuffer,
         const RootSignature* rootSignature)
     {
         if (bindingUpdateMask)
@@ -1163,6 +1164,15 @@ namespace nvrhi::d3d12
                 requireBufferState(indirectParams, ResourceStates::IndirectArgument);
             }
             m_Instance->referencedResources.push_back(indirectParams);
+        }
+
+        if (indirectCountBuffer && updateIndirectCountBuffer)
+        {
+            if (m_EnableAutomaticBarriers)
+            {
+                requireBufferState(indirectCountBuffer, ResourceStates::IndirectArgument);
+            }
+            m_Instance->referencedResources.push_back(indirectCountBuffer);
         }
 
         uint32_t bindingMask = (1 << uint32_t(bindings.size())) - 1;

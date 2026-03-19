@@ -64,7 +64,7 @@ namespace nvrhi
 {
     // Version of the public API provided by NVRHI.
     // Increment this when any changes to the API are made.
-    static constexpr uint32_t c_HeaderVersion = 22;
+    static constexpr uint32_t c_HeaderVersion = 23;
 
     // Verifies that the version of the implementation matches the version of the header.
     // Returns true if they match. Use this when initializing apps using NVRHI as a shared library.
@@ -2664,6 +2664,7 @@ namespace nvrhi
         IndexBufferBinding indexBuffer;
 
         IBuffer* indirectParams = nullptr;
+        IBuffer* indirectCountBuffer = nullptr;
 
         GraphicsState& setPipeline(IGraphicsPipeline* value) { pipeline = value; return *this; }
         GraphicsState& setFramebuffer(IFramebuffer* value) { framebuffer = value; return *this; }
@@ -2675,6 +2676,7 @@ namespace nvrhi
         GraphicsState& addVertexBuffer(const VertexBufferBinding& value) { vertexBuffers.push_back(value); return *this; }
         GraphicsState& setIndexBuffer(const IndexBufferBinding& value) { indexBuffer = value; return *this; }
         GraphicsState& setIndirectParams(IBuffer* value) { indirectParams = value; return *this; }
+        GraphicsState& setIndirectCountBuffer(IBuffer* value) { indirectCountBuffer = value; return *this; }
     };
 
     struct DrawArguments
@@ -3315,7 +3317,16 @@ namespace nvrhi
         // - DX12: Maps to ExecuteIndirect with a predefined signature.
         // - Vulkan: Maps to vkCmdDrawIndexedIndirect.
         virtual void drawIndexedIndirect(uint32_t offsetBytes, uint32_t drawCount = 1) = 0;
-        
+
+		// Draws primitives with indexed vertices using the parameters provided in the indirect arguments buffer
+        //   at offset 'paramOffsetBytes'.
+		// The draw count is read from the indirectCountBuffer specified in setGraphicsState(...)
+        //   at offset 'countOffsetBytes'.
+		// - DX11: Falls back to drawIndexedIndirect(paramOffsetBytes, maxDrawCount)
+		// - DX12: Maps to ExecuteIndirect with pCountBuffer parameter.
+		// - Vulkan: Maps to vkCmdDrawIndexedIndirectCount.
+		virtual void drawIndexedIndirectCount(uint32_t paramOffsetBytes, uint32_t countOffsetBytes, uint32_t maxDrawCount) = 0;
+
         // Sets the specified compute state on the command list.
         // The state includes the pipeline (or individual shaders on DX11) and all resources bound to it.
         // See the members of ComputeState for more information.

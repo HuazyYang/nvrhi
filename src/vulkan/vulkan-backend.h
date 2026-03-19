@@ -586,13 +586,11 @@ namespace nvrhi::vulkan
         TextureDesc desc;
         // backing store for staging texture is a buffer
         RefCountPtr<Buffer> buffer;
-        // per-mip, per-slice regions
-        // offset = mipLevel * numDepthSlices + depthSlice
+        // Per-mip, per-slice regions: index = mipLevel * arraySize + arraySlice
         std::vector<PlacedSubresourceFootprint> placedFootprints;
 
         size_t computeCopyableFootprints();
-        const PlacedSubresourceFootprint& getCopyableFootprint(uint32_t mipLevel,
-                                                               uint32_t arraySlice);
+        const PlacedSubresourceFootprint* getCopyableFootprint(MipLevel mipLevel, ArraySlice arraySlice);
         
         const TextureDesc& getDesc() const override { return desc; }
     };
@@ -1236,6 +1234,7 @@ namespace nvrhi::vulkan
         void drawIndexed(const DrawArguments& args) override;
         void drawIndirect(uint32_t offsetBytes, uint32_t drawCount) override;
         void drawIndexedIndirect(uint32_t offsetBytes, uint32_t drawCount) override;
+        void drawIndexedIndirectCount(uint32_t paramOffsetBytes, uint32_t countOffsetBytes, uint32_t maxDrawCount) override;
 
         void setComputeState(const ComputeState& state) override;
         void dispatch(uint32_t groupsX, uint32_t groupsY = 1, uint32_t groupsZ = 1) override;
