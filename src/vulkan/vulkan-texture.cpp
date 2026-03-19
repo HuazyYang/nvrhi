@@ -488,6 +488,9 @@ namespace nvrhi::vulkan
         uint32_t deviceRowPitch = deviceNumCols * formatInfo.bytesPerBlock;
         uint64_t deviceMemSize = uint64_t(deviceRowPitch) * uint64_t(deviceNumRows) * mipDepth;
 
+        if(rowPitch == 0)
+            rowPitch = deviceRowPitch;
+
         Buffer* uploadBuffer;
         uint64_t uploadOffset;
         void* uploadCpuVA;

@@ -1363,6 +1363,7 @@ namespace nvrhi::d3d12
 
         m_Context.device->GetCopyableFootprints(&resourceDesc, subresource, 1, 0, &footprint, &numRows, &rowSizeInBytes, &totalBytes);
 
+        if(rowPitch == 0)
             rowPitch = rowSizeInBytes;
 
         void* cpuVA;
