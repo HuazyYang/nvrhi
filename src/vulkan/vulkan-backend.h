@@ -158,6 +158,7 @@ namespace nvrhi::vulkan
             bool NV_device_diagnostic_checkpoints = false;
             bool NV_device_diagnostics_config= false;
 #endif
+            bool EXT_depth_clip_enable = false;
         } extensions;
 
         vk::PhysicalDeviceProperties physicalDeviceProperties;

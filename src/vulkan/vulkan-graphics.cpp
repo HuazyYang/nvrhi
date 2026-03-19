@@ -329,6 +329,12 @@ namespace nvrhi::vulkan
                             .setDepthBiasClamp(rasterState.depthBiasClamp)
                             .setDepthBiasSlopeFactor(rasterState.slopeScaledDepthBias)
                             .setLineWidth(1.0f);
+
+        vk::PipelineRasterizationDepthClipStateCreateInfoEXT depthClipEnableExt;
+        if (m_Context.extensions.EXT_depth_clip_enable && !rasterState.depthClipEnable) {
+            depthClipEnableExt.setDepthClipEnable(false);
+            rasterizer.setPNext(&depthClipEnableExt);
+        }
         
         // Conservative raster state
         auto conservativeRasterState = vk::PipelineRasterizationConservativeStateCreateInfoEXT()

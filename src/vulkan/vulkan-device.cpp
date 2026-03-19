@@ -95,6 +95,7 @@ namespace nvrhi::vulkan
             { VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME, &m_Context.extensions.NV_device_diagnostic_checkpoints },
             { VK_NV_DEVICE_DIAGNOSTICS_CONFIG_EXTENSION_NAME, &m_Context.extensions.NV_device_diagnostics_config }
 #endif
+            { VK_EXT_DEPTH_CLIP_ENABLE_EXTENSION_NAME, &m_Context.extensions.EXT_depth_clip_enable }
         };
 
         // parse the extension/layer lists and figure out which extensions are enabled
