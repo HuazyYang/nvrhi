@@ -125,7 +125,18 @@ namespace nvrhi::d3d12
                     if (!found)
                     {
                         // Create a default sampler
-                        D3D12_SAMPLER_DESC samplerDesc = {};
+                        D3D12_SAMPLER_DESC samplerDesc = {
+                            D3D12_FILTER_MIN_MAG_MIP_POINT,
+                            D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                            D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                            D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                            0.f,
+                            0,
+                            D3D12_COMPARISON_FUNC_NONE,
+                            {},
+                            0.f,
+                            D3D12_FLOAT32_MAX
+                        };
                         m_Context.device->CreateSampler(&samplerDesc, descriptorHandle);
                     }
                 }

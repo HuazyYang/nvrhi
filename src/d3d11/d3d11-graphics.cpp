@@ -256,7 +256,8 @@ namespace nvrhi::d3d11
                     maxUAVSlot = std::max(maxUAVSlot, bindingSet->maxUAVSlot);
                 }
 
-                m_Context.immediateContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, minUAVSlot, maxUAVSlot - minUAVSlot + 1, UAVs + minUAVSlot, initialCounts);
+                if(minUAVSlot <= maxUAVSlot)
+                    m_Context.immediateContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, minUAVSlot, maxUAVSlot - minUAVSlot + 1, UAVs + minUAVSlot, initialCounts);
             }
         }
 
