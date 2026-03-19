@@ -487,7 +487,7 @@ namespace nvrhi::d3d12
         planeCount = m_Resources.getFormatPlaneCount(resourceDesc.Format);
     }
 
-    DescriptorIndex Texture::getClearMipLevelUAV(uint32_t mipLevel)
+    DescriptorIndex Texture::getClearMipLevelUAV(uint32_t mipLevel, Format interpretFormat)
     {
         assert(desc.isUAV);
 
@@ -498,7 +498,7 @@ namespace nvrhi::d3d12
 
         descriptorIndex = m_Resources.shaderResourceViewHeap.allocateDescriptor();
         TextureSubresourceSet subresources(mipLevel, 1, 0, TextureSubresourceSet::AllArraySlices);
-        createUAV(m_Resources.shaderResourceViewHeap.getCpuHandle(descriptorIndex).ptr, Format::UNKNOWN, TextureDimension::Unknown, subresources);
+        createUAV(m_Resources.shaderResourceViewHeap.getCpuHandle(descriptorIndex).ptr, interpretFormat, TextureDimension::Unknown, subresources);
         m_Resources.shaderResourceViewHeap.copyToShaderVisibleHeap(descriptorIndex);
         m_ClearMipLevelUAVs[mipLevel] = descriptorIndex;
 
@@ -1015,7 +1015,7 @@ namespace nvrhi::d3d12
 
             for (MipLevel mipLevel = subresources.baseMipLevel; mipLevel < subresources.baseMipLevel + subresources.numMipLevels; mipLevel++)
             {
-                DescriptorIndex index = t->getClearMipLevelUAV(mipLevel);
+                DescriptorIndex index = t->getClearMipLevelUAV(mipLevel, Format::UNKNOWN);
 
                 assert(index != c_InvalidDescriptorIndex);
 
@@ -1079,11 +1079,38 @@ namespace nvrhi::d3d12
     {
         Texture* t = checked_cast<Texture*>(_t);
 
-#ifdef _DEBUG
         const FormatInfo& formatInfo = getFormatInfo(t->desc.format);
+#ifdef _DEBUG
         assert(!formatInfo.hasDepth && !formatInfo.hasStencil);
         assert(t->desc.isUAV || t->desc.isRenderTarget);
 #endif
+
+        Format interpretFormat = t->desc.format;
+        if (t->desc.isTypeless) {
+            if (!(formatInfo.hasDepth || formatInfo.hasStencil)) {
+                switch (formatInfo.bytesPerBlock) {
+                    case 1:
+                        interpretFormat = Format::R8_UINT;
+                        break;
+                    case 2:
+                        interpretFormat = Format::R16_UINT;
+                        break;
+                    case 4:
+                        interpretFormat = Format::R32_UINT;
+                        break;
+                    case 8:
+                        interpretFormat = Format::RG32_UINT;
+                        break;
+                    case 12:
+                        interpretFormat = Format::RGB32_UINT;
+                        break;
+                    case 16:
+                        interpretFormat = Format::RGBA32_UINT;
+                        break;
+                }
+            }
+        }
+
         subresources = subresources.resolve(t->desc, false);
 
         uint32_t clearValues[4] = { clearColor, clearColor, clearColor, clearColor };
@@ -1103,7 +1130,7 @@ namespace nvrhi::d3d12
 
             for (MipLevel mipLevel = subresources.baseMipLevel; mipLevel < subresources.baseMipLevel + subresources.numMipLevels; mipLevel++)
             {
-                DescriptorIndex index = t->getClearMipLevelUAV(mipLevel);
+                DescriptorIndex index = t->getClearMipLevelUAV(mipLevel, interpretFormat);
 
                 assert(index != c_InvalidDescriptorIndex);
 
@@ -1335,6 +1362,8 @@ namespace nvrhi::d3d12
         uint64_t totalBytes;
 
         m_Context.device->GetCopyableFootprints(&resourceDesc, subresource, 1, 0, &footprint, &numRows, &rowSizeInBytes, &totalBytes);
+
+            rowPitch = rowSizeInBytes;
 
         void* cpuVA;
         ID3D12Resource* uploadBuffer;

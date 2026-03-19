@@ -303,7 +303,7 @@ namespace nvrhi::d3d12
         void createUAV(size_t descriptor, Format format, TextureDimension dimension, TextureSubresourceSet subresources) const;
         void createRTV(size_t descriptor, Format format, TextureSubresourceSet subresources) const;
         void createDSV(size_t descriptor, TextureSubresourceSet subresources, bool isReadOnly = false) const;
-        DescriptorIndex getClearMipLevelUAV(uint32_t mipLevel);
+        DescriptorIndex getClearMipLevelUAV(uint32_t mipLevel, Format interpretFormat);
 
     private:
         const Context& m_Context;

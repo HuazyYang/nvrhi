@@ -339,11 +339,38 @@ namespace nvrhi::d3d11
     {
         Texture* texture = checked_cast<Texture*>(_texture);
 
-#ifdef _DEBUG
         const FormatInfo& formatInfo = getFormatInfo(texture->desc.format);
+#ifdef _DEBUG
         assert(!formatInfo.hasDepth && !formatInfo.hasStencil);
         assert(texture->desc.isUAV || texture->desc.isRenderTarget);
+        assert(formatInfo.blockSize == 1);
 #endif
+
+        Format interpretFormat = texture->desc.format;
+        if (texture->desc.isTypeless) {
+            if (!(formatInfo.hasDepth || formatInfo.hasStencil)) {
+                switch (formatInfo.bytesPerBlock) {
+                    case 1:
+                        interpretFormat = Format::R8_UINT;
+                        break;
+                    case 2:
+                        interpretFormat = Format::R16_UINT;
+                        break;
+                    case 4:
+                        interpretFormat = Format::R32_UINT;
+                        break;
+                    case 8:
+                        interpretFormat = Format::RG32_UINT;
+                        break;
+                    case 12:
+                        interpretFormat = Format::RGB32_UINT;
+                        break;
+                    case 16:
+                        interpretFormat = Format::RGBA32_UINT;
+                        break;
+                }
+            }
+        }
 
         subresources = subresources.resolve(texture->desc, false);
 
@@ -353,7 +380,7 @@ namespace nvrhi::d3d11
 
             if (texture->desc.isUAV)
             {
-                ID3D11UnorderedAccessView* uav = texture->getUAV(Format::UNKNOWN, currentMipSlice, TextureDimension::Unknown);
+                ID3D11UnorderedAccessView* uav = texture->getUAV(interpretFormat, currentMipSlice, TextureDimension::Unknown);
 
                 uint32_t clearValues[4] = { clearColor, clearColor, clearColor, clearColor };
                 m_Context.immediateContext->ClearUnorderedAccessViewUint(uav, clearValues);
